@@ -1,6 +1,14 @@
 # Husky + OAK-D Navigation Simulation using dockerized rtabmap_ros
 
+The sequence is important! Launch Gazebo first then rtabmap_ros
+
 Terminal 1:
+```bash
+export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oak_navigation/urdf/oak-d.urdf.xacro
+roslaunch husky_gazebo husky_playpen.launch
+```
+
+Terminal 2:
 ```bash
 sudo -s # Switch to root user
 
@@ -32,17 +40,12 @@ cd /root/catkin_ws/
 rm -rf build/ devel/
 catkin_make
 source devel/setup.bash
+export LD_PRELOAD=/lib/aarch64-linux-gnu/libgomp.so.1:$LD_PRELOAD
 roslaunch husky_oak_navigation demo_husky_oakd_navigation.launch
-```
-
-Terminal 2:
-```bash
-export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oak_navigation/urdf/oak-d.urdf.xacro
-roslaunch husky_viz view_robot.launch
 ```
 
 Terminal 3:
 ```bash
 export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oak_navigation/urdf/oak-d.urdf.xacro
-roslaunch husky_gazebo husky_playpen.launch
+roslaunch husky_viz view_robot.launch
 ```

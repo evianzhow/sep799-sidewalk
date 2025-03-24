@@ -1,6 +1,14 @@
 # Turtlebot3 Navigation Simulation using dockerized rtabmap_ros
 
+The sequence is important! Launch Gazebo first then rtabmap_ros
+
 Terminal 1:
+```bash
+export TURTLEBOT3_MODEL=waffle
+roslaunch turtlebot3_gazebo turtlebot3_world.launch
+```
+
+Terminal 2:
 ```bash
 sudo -s # Switch to root user
 
@@ -32,8 +40,3 @@ export LD_PRELOAD=/lib/aarch64-linux-gnu/libgomp.so.1:$LD_PRELOAD
 roslaunch rtabmap_demos demo_turtlebot3_navigation.launch
 ```
 
-Terminal 2:
-```bash
-export TURTLEBOT3_MODEL=waffle
-roslaunch turtlebot3_gazebo turtlebot3_world.launch
-```

@@ -14,6 +14,8 @@
 
   <!-- Arguments -->
   <arg name="rtabmap_viz" default="true"/>
+  <!--  https://www.clearpathrobotics.com/assets/guides/noetic/husky/InterfacingWithHusky.html -->
+  <arg name="odom_topic" default="/odometry/filtered"/>
 
   <arg name="with_camera" default="true"/>
   <arg name="localization" default="false"/>
@@ -42,7 +44,7 @@
       <remap from="move_base"            to="/move_base"/>
 
       <!-- inputs -->
-      <remap from="odom"            to="/odometry/filtered"/>
+      <remap from="odom"            to="$(arg odom_topic)"/>
       <remap from="rgbd_image"       to="rgbd_image"/>
 
       <!-- output -->
@@ -65,7 +67,7 @@
       <param name="frame_id"         type="string" value="base_footprint"/>
       <param name="approx_sync"      type="bool"   value="true"/>
 
-      <remap from="odom"            to="/odometry/filtered"/>
+      <remap from="odom"            to="$(arg odom_topic)"/>
     </node>
   </group>
 

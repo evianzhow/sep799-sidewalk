@@ -169,3 +169,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# ROS 1
+catkin_ws/build/
+catkin_ws/devel/
+catkin_ws/install/

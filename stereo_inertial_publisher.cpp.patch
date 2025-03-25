@@ -1,0 +1,61 @@
+diff --git a/depthai_examples/src/stereo_inertial_publisher.cpp b/depthai_examples/src/stereo_inertial_publisher.cpp
+index b16b347..9d13e33 100644
+--- a/depthai_examples/src/stereo_inertial_publisher.cpp
++++ b/depthai_examples/src/stereo_inertial_publisher.cpp
+@@ -56,6 +56,7 @@ std::tuple<dai::Pipeline, int, int> createPipeline(bool enableDepth,
+     auto monoLeft = pipeline.create<dai::node::MonoCamera>();
+     auto monoRight = pipeline.create<dai::node::MonoCamera>();
+     auto stereo = pipeline.create<dai::node::StereoDepth>();
++    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::ROBOTICS);
+     auto xoutDepth = pipeline.create<dai::node::XLinkOut>();
+     auto imu = pipeline.create<dai::node::IMU>();
+     auto xoutImu = pipeline.create<dai::node::XLinkOut>();
+@@ -111,6 +112,48 @@ std::tuple<dai::Pipeline, int, int> createPipeline(bool enableDepth,
+     stereo->setExtendedDisparity(extended);
+     stereo->setSubpixel(subpixel);
+     if(enableDepth && depth_aligned) stereo->setDepthAlign(dai::CameraBoardSocket::CAM_A);
++    
++    // Derived from ROBOTICS profile
++    dai::RawStereoDepthConfig config = stereo->initialConfig.get();
++    config.postProcessing.filteringOrder = {
++        dai::RawStereoDepthConfig::PostProcessing::Filter::DECIMATION,
++        dai::RawStereoDepthConfig::PostProcessing::Filter::MEDIAN,
++        dai::RawStereoDepthConfig::PostProcessing::Filter::SPECKLE,
++        dai::RawStereoDepthConfig::PostProcessing::Filter::SPATIAL,
++        dai::RawStereoDepthConfig::PostProcessing::Filter::TEMPORAL
++    };
++    
++    // Decimation filter
++    config.postProcessing.decimationFilter.decimationFactor = 2;
++    config.postProcessing.decimationFilter.decimationMode = 
++        dai::RawStereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode::PIXEL_SKIPPING;
++
++    // Spatial filter
++    config.postProcessing.spatialFilter.enable = true;
++    config.postProcessing.spatialFilter.holeFillingRadius = 2;
++    config.postProcessing.spatialFilter.numIterations = 1;
++    config.postProcessing.spatialFilter.alpha = 0.5;
++    config.postProcessing.spatialFilter.delta = 20;
++
++    // Temporal filter (disabled)
++    config.postProcessing.temporalFilter.enable = false;
++    config.postProcessing.temporalFilter.alpha = 0.5;
++    config.postProcessing.temporalFilter.delta = 3;
++
++    // Speckle filter
++    config.postProcessing.speckleFilter.enable = true;
++    config.postProcessing.speckleFilter.speckleRange = 200;
++    config.postProcessing.speckleFilter.differenceThreshold = 2;
++
++    // Threshold filter
++    config.postProcessing.thresholdFilter.minRange = 0;
++    config.postProcessing.thresholdFilter.maxRange = 10000;
++
++    // Apply the updated configuration
++    stereo->initialConfig.set(config);
++
++    // Set hardware resources (if supported by your depthai-ros version)
++    stereo->setPostProcessingHardwareResources(3, 3);
+ 
+     // Imu
+     imu->enableIMUSensor(dai::IMUSensor::ACCELEROMETER_RAW, 500);

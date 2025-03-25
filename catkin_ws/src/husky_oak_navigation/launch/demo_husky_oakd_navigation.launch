@@ -16,6 +16,7 @@
   <arg name="rtabmap_viz" default="true"/>
   <!--  https://www.clearpathrobotics.com/assets/guides/noetic/husky/InterfacingWithHusky.html -->
   <arg name="odom_topic" default="/odometry/filtered"/>
+  <arg name="imu_topic" default="/oak_d/imu"/>
 
   <arg name="with_camera" default="true"/>
   <arg name="localization" default="false"/>
@@ -45,7 +46,8 @@
 
       <!-- inputs -->
       <remap from="odom"            to="$(arg odom_topic)"/>
-      <remap from="rgbd_image"       to="rgbd_image"/>
+      <remap from="rgbd_image"      to="rgbd_image"/>
+      <remap from="imu"              to="$(arg imu_topic)"/>
 
       <!-- output -->
       <remap from="grid_map" to="/map"/>

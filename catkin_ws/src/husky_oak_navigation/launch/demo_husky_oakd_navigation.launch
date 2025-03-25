@@ -1,23 +1,27 @@
 <?xml version="1.0"?>
 <launch>
-  <!--
-    $ sudo apt install ros-melodic-turtlebot3* ros-melodic-dwa-local-planner
-    To avoid TF warning about leading '/' in frame name, remove it in:
-       - "/opt/ros/melodic/share/turtlebot3_navigation/param/global_costmap_params.yaml"
-       - "/opt/ros/melodic/share/turtlebot3_navigation/param/local_costmap_params.yaml"
-
-  -->
-
   <!-- Extra Payload -->
   <!-- Set the environment variable -->
   <env name="HUSKY_URDF_EXTRAS" value="$(find husky_oak_navigation)/urdf/oak-d.urdf.xacro" />
 
   <!-- Arguments -->
+  <arg name="oak_d_type" default="simulator"/>
   <arg name="rtabmap_viz" default="true"/>
+
   <!--  https://www.clearpathrobotics.com/assets/guides/noetic/husky/InterfacingWithHusky.html -->
   <arg name="odom_topic" default="/odometry/filtered"/>
-  <arg name="imu_topic" default="/oak_d/imu"/>
 
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="rgb_image_raw" default="/oak_depth/rgb/image_raw"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="depth_image_raw" default="/oak_depth/depth/image_raw"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="rgb_camera_info" default="/oak_depth/rgb/camera_info"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="imu_topic" default="/oak_d/imu"/>
+
+  <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="rgb_image_raw" default="/stereo_inertial_publisher/color/image"/>
+  <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="depth_image_raw" default="/stereo_inertial_publisher/stereo/depth"/>
+  <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="rgb_camera_info" default="/stereo_inertial_publisher/color/camera_info"/>
+  <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="imu_topic" default="/stereo_inertial_publisher/imu/data"/>
+
+  <!-- RTAB-Map -->
   <arg name="with_camera" default="true"/>
   <arg name="localization" default="false"/>
   <arg name="database_path" default="~/.ros/rtabmap.db"/>
@@ -26,9 +30,9 @@
 
   <group ns="rtabmap">
     <node pkg="rtabmap_sync" type="rgbd_sync" name="rgbd_sync" output="screen">
-      <remap from="rgb/image"         to="/oak_depth/rgb/image_raw"/>
-      <remap from="depth/image"       to="/oak_depth/depth/image_raw"/>
-      <remap from="rgb/camera_info"   to="/oak_depth/rgb/camera_info"/>
+      <remap from="rgb/image"         to="$(arg rgb_image_raw)"/>
+      <remap from="depth/image"       to="$(arg depth_image_raw)"/>
+      <remap from="rgb/camera_info"   to="$(arg rgb_camera_info)"/>
     </node>
 
     <node name="rtabmap" pkg="rtabmap_slam" type="rtabmap" output="screen" args="$(arg rtabmap_args)">
@@ -75,5 +79,19 @@
 
   <!-- move_base -->
   <include file="$(find husky_navigation)/launch/move_base.launch" />
+
+  <!-- IMU Filter Node -->
+  <node unless="$(eval arg('oak_d_type') == 'simulator')" 
+        pkg="imu_filter_madgwick" 
+        type="imu_filter_node" 
+        name="imu_filter_node">
+      <!-- Remappings -->
+      <remap from="imu/data_raw" to="$(arg imu_topic)"/>
+      <remap from="imu/data" to="$(arg imu_topic)/data"/>
+
+      <!-- Parameters -->
+      <param name="use_mag" value="false"/>
+      <param name="publish_tf" value="false"/>
+  </node>
 
 </launch>

@@ -86,8 +86,8 @@
         type="imu_filter_node" 
         name="imu_filter_node">
       <!-- Remappings -->
-      <remap from="imu/data_raw" to="$(arg imu_topic)"/>
-      <remap from="imu/data" to="$(arg imu_topic)/data"/>
+      <remap from="imu/data_raw" to="/stereo_inertial_publisher/imu"/>
+      <remap from="imu/data" to="$(arg imu_topic)"/>
 
       <!-- Parameters -->
       <param name="use_mag" value="false"/>

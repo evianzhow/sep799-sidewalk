@@ -25,5 +25,6 @@
 
   <exec_depend>husky_navigation</exec_depend>
   <exec_depend>depthai_descriptions</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
 
 </package>

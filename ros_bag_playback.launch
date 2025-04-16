@@ -1,0 +1,28 @@
+<launch>
+  <!-- 1. IMU Filter Node (Madgwick) -->
+  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_node" output="screen">
+    <remap from="imu/data_raw" to="/stereo_inertial_publisher/imu"/>
+    <remap from="imu/data" to="/stereo_inertial_publisher/imu/data"/>
+    <param name="use_mag" value="false"/>
+    <param name="publish_tf" value="false"/>
+  </node>
+
+  <!-- 2. Image Transport Republish for color image -->
+  <node pkg="image_transport" type="republish" name="republish_color" output="screen" 
+    args="compressed in:=/stereo_inertial_publisher/color/image raw out:=/stereo_inertial_publisher/color/image"
+  />
+
+  <!-- 3. Image Transport Republish for depth image -->
+  <node pkg="image_transport" type="republish" name="republish_depth" output="screen" 
+    args="compressedDepth in:=/stereo_inertial_publisher/stereo/depth raw out:=/stereo_inertial_publisher/stereo/depth"
+  />
+
+  <!-- Static transform: oak-d_frame  ➜  oak_rgb_camera_optical_frame -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="static_tf_oakd_to_rgb" output="screen"
+        args="0.000 0.000 0.000 -0.500 0.500 -0.500 0.500 oak-d_frame oak_rgb_camera_optical_frame" />
+
+  <!-- Static transform: oak-d_frame  ➜  oak_imu_frame -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="static_tf_oakd_to_imu" output="screen"
+        args="0.000 -0.015 -0.014 0.000 0.707 0.000 0.707 oak-d_frame oak_imu_frame" />
+
+</launch>

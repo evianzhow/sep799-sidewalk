@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="local_bundle" default="true" />
+    <arg name="database_path" default="~/.ros/rtabmap.db"/>
+
+    <group ns="rtabmap">
+        <arg name="rgb_image_raw" default="/stereo_inertial_publisher/color/image"/>
+        <arg name="depth_image_raw" default="/stereo_inertial_publisher/stereo/depth"/>
+        <arg name="rgb_camera_info" default="/stereo_inertial_publisher/color/camera_info"/>
+        <arg name="imu_topic" default="/stereo_inertial_publisher/imu/data"/>
+
+        <node pkg="rtabmap_sync" type="rgbd_sync" name="rgbd_sync" output="screen">
+            <remap from="rgb/image"         to="$(arg rgb_image_raw)"/>
+            <remap from="depth/image"       to="$(arg depth_image_raw)"/>
+            <remap from="rgb/camera_info"   to="$(arg rgb_camera_info)"/>
+        </node>
+        <!-- IMU Data for Odometry -->
+        <node pkg="rtabmap_odom" type="rgbd_odometry" name="rtabmap_odom">
+            <remap from="rgbd_image"       to="rgbd_image"/>
+            <remap from="odom"                  to="/odom"/>
+            <param name="subscribe_rgbd"  type="bool" value="true"/>
+            <param name="frame_id" value="oak-d_frame"/>
+            <param name="odom_frame_id"   type="string" value="odom"/>
+
+            <!-- <param name="Odom/Strategy"      type="string" value="0"/> --> <!-- 0=Frame-to-Map, 1=Frame=to=Frame -->
+            <!-- <param name="Vis/EstimationType" type="string" value="1"/> --> <!-- 0=3D->3D 1=3D->2D (PnP) -->
+            <!-- <param name="Vis/MaxDepth"       type="string" value="0"/> -->
+            <param name="Odom/GuessMotion" type="string" value="true"/>
+            <!-- <param name="Vis/MinInliers"     type="string" value="10"/> -->
+            <param unless="$(arg local_bundle)" name="OdomF2M/BundleAdjustment" type="string" value="0"/>
+            <!-- <param name="OdomF2M/MaxSize"    type="string" value="1000"/> -->
+            <!-- <param name="GFTT/MinDistance"   type="string" value="10"/> -->
+            <!-- <param name="GFTT/QualityLevel"  type="string" value="0.00001"/> -->
+            <!-- <param name="GFTT/QualityLevel"  type="string" value="0.00001"/> -->
+        </node>
+
+        <!-- SLAM Node for Mapping -->
+        <node pkg="rtabmap_slam" type="rtabmap" name="rtabmap_slam">
+            <param name="database_path"       type="string" value="$(arg database_path)"/>
+            <param name="frame_id" value="oak-d_frame"/>
+            <param name="subscribe_rgb"   type="bool" value="false"/>
+            <param name="subscribe_depth" type="bool" value="false"/>
+            <param name="subscribe_rgbd" type="bool" value="true"/>
+            <param name="subscribe_imu" value="true"/>
+            <param name="detect_rate" value="1"/>
+            <param name="frame_id" value="oak-d_frame"/>
+            <param name="approx_sync"         type="bool"   value="true"/>
+
+            <remap from="odom"            to="/odom"/>
+            <remap from="rgbd_image"       to="rgbd_image"/>
+            <remap from="imu"           to="$(arg imu_topic)"/>
+            <!-- output -->
+
+            <remap from="grid_map" to="/map"/>
+        </node>
+
+        <!-- Visualization Node for GUI -->
+        <node pkg="rtabmap_viz" type="rtabmap_viz" name="rtabmap_viz" output="screen">
+            <param name="frame_id" value="oak-d_frame"/>
+            <param name="subscribe_scan" value="false"/>
+            <param name="subscribe_odom" value="true"/>
+            <param name="subscribe_rgb" value="true"/>
+            <param name="subscribe_depth" value="true"/>
+            <param name="subscribe_imu" value="true"/>
+            <param name="visualize_occupancy_grid" value="true"/>
+            <remap from="odom"            to="/odom"/>
+
+        </node>
+    </group>
+</launch>

@@ -37,7 +37,6 @@
         <!-- SLAM Node for Mapping -->
         <node pkg="rtabmap_slam" type="rtabmap" name="rtabmap_slam">
             <param name="database_path"       type="string" value="$(arg database_path)"/>
-            <param name="frame_id" value="oak-d_frame"/>
             <param name="subscribe_rgb"   type="bool" value="false"/>
             <param name="subscribe_depth" type="bool" value="false"/>
             <param name="subscribe_rgbd" type="bool" value="true"/>

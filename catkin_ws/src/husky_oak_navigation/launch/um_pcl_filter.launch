@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- PCL filter for ZED pointcloud -->
+    <node name="statistical_outlier_removal" pkg="nodelet" type="nodelet" args="standalone pcl/StatisticalOutlierRemoval">
+        <remap from="statistical_outlier_removal/input" to="/stereo_inertial_publisher/stereo/points" />
+        <remap from="statistical_outlier_removal/output" to="/point_cloud_filtered" />
+        <rosparam>
+            mean_k: 9
+            stddev: 0.05
+        </rosparam>
+    </node>
+</launch>

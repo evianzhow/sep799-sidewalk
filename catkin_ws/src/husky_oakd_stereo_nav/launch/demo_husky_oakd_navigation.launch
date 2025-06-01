@@ -2,7 +2,7 @@
 <launch>
   <!-- Extra Payload -->
   <!-- Set the environment variable -->
-  <env name="HUSKY_URDF_EXTRAS" value="$(find husky_oak_navigation)/urdf/oak-d.urdf.xacro" />
+  <env name="HUSKY_URDF_EXTRAS" value="$(find husky_oakd_stereo_nav)/urdf/oak-d.urdf.xacro" />
 
   <!-- Arguments -->
   <arg name="oak_d_type" default="simulator"/>

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <description brief="husky_oak_navigation">
+  <description brief="husky_oakd_stereo_nav">
 
-     husky_oak_navigation
+     husky_oakd_stereo_nav
 
   </description>
   <version>0.0.1</version>

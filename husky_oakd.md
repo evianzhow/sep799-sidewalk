@@ -4,7 +4,7 @@ The sequence is important! Launch Gazebo first then rtabmap_ros
 
 Terminal 1:
 ```bash
-export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oak_navigation/urdf/oak-d.urdf.xacro
+export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oakd_stereo_nav/urdf/oak-d.urdf.xacro
 roslaunch husky_gazebo husky_playpen.launch
 ```
 
@@ -41,19 +41,19 @@ rm -rf build/ devel/
 catkin_make
 source devel/setup.bash
 export LD_PRELOAD=/lib/aarch64-linux-gnu/libgomp.so.1:$LD_PRELOAD
-roslaunch husky_oak_navigation demo_husky_oakd_navigation.launch
+roslaunch husky_oakd_stereo_nav demo_husky_oakd_navigation.launch
 ```
 
-If you are using a real device, launch husky_oak_navigation with following command:
+If you are using a real device, launch husky_oakd_stereo_nav with following command:
 ```bash
-roslaunch husky_oak_navigation demo_husky_oakd_navigation.launch oak_d_type:=device
+roslaunch husky_oakd_stereo_nav demo_husky_oakd_navigation.launch oak_d_type:=device
 ```
 
 `imu_filter_madgwick` should be automatically launched as a node.
 
 Terminal 3:
 ```bash
-export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oak_navigation/urdf/oak-d.urdf.xacro
+export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oakd_stereo_nav/urdf/oak-d.urdf.xacro
 roslaunch husky_viz view_robot.launch
 ```
 

@@ -4,7 +4,7 @@ The sequence is important! Launch Gazebo first then rtabmap_ros
 
 Terminal 1:
 ```bash
-export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oakd_stereo_nav/urdf/oak-d.urdf.xacro
+export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oakd_stereo_nav/urdf/mcm07_customization.urdf.xacro
 roslaunch husky_gazebo husky_playpen.launch
 ```
 
@@ -53,7 +53,7 @@ roslaunch husky_oakd_stereo_nav demo_husky_oakd_navigation.launch oak_d_type:=de
 
 Terminal 3:
 ```bash
-export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oakd_stereo_nav/urdf/oak-d.urdf.xacro
+export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oakd_stereo_nav/urdf/mcm07_customization.urdf.xacro
 roslaunch husky_viz view_robot.launch
 ```
 

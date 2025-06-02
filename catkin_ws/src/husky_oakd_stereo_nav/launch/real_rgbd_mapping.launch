@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="odom_topic" default="/odom"/>
+    <arg name="compressed" default="false"/>
+    <arg name="tf_compensation" default="false"/>
+    <arg name="visualize" default="true"/>
+
+    <!-- depthai_examples/stereo_inertial_node.launch Outputs -->
+    <arg name="rgb_image_raw" default="/stereo_inertial_publisher/color/image"/>
+    <arg name="depth_image_raw" default="/stereo_inertial_publisher/stereo/depth"/>
+    <arg name="rgb_camera_info" default="/stereo_inertial_publisher/color/camera_info"/>
+    <arg name="imu_topic" default="/stereo_inertial_publisher/imu/data"/>
+
+    <group ns="rtabmap">
+        <arg name="local_bundle" default="true" />
+        <arg name="database_path" default="~/.ros/rtabmap.db"/>
+
+        <node pkg="rtabmap_sync" type="rgbd_sync" name="rgbd_sync" output="screen">
+            <remap from="rgb/image"         to="$(arg rgb_image_raw)"/>
+            <remap from="depth/image"       to="$(arg depth_image_raw)"/>
+            <remap from="rgb/camera_info"   to="$(arg rgb_camera_info)"/>
+        </node>
+
+        <!-- IMU Data for Odometry -->
+        <node pkg="rtabmap_odom" type="rgbd_odometry" name="rtabmap_odom">
+            <remap from="rgbd_image"       to="rgbd_image"/>
+            <remap from="odom"                  to="/odom"/>
+            <param name="subscribe_rgbd"  type="bool" value="true"/>
+            <param name="frame_id" value="base_link"/>
+            <param name="odom_frame_id"   type="string" value="odom"/>
+
+            <!-- params controlling how strict odometry is about accepting correspondences,
+             trade-off between frequency/robustness and accuracy -->
+            <param name="Vis/InlierDistance" type="string" value="0.1" />
+            <param name="Vis/MinInliers" type="string" value="20" />
+
+            <param name="GFTT/MinDistance" type="string" value="5" />
+            <param name="publish_tf" type="bool" value="true" />
+
+            <!-- restrict pose of robot to 3 degrees of freedom (x, y, theta), i.e a 2D plane -->
+            <param name="Reg/Force3DoF" value="true"/>
+        </node>
+
+        <!-- SLAM Node for Mapping -->
+        <node pkg="rtabmap_slam" type="rtabmap" name="rtabmap_slam">
+            <param name="frame_id" value="base_link"/>
+            <param name="database_path"       type="string" value="$(arg database_path)"/>
+            
+            <param name="subscribe_rgb"   type="bool" value="false"/>
+            <param name="subscribe_depth" type="bool" value="false"/>
+            <param name="subscribe_rgbd" type="bool" value="true"/>
+            
+            <remap from="odom"            to="$(arg odom_topic)"/>
+            <remap from="rgbd_image"       to="rgbd_image"/>
+            <param name="approx_sync"         type="bool"   value="true"/>
+
+            <param name="queue_size" type="int" value="30" />
+            <!-- SLAM mode -->
+            <param name="Mem/IncrementalMemory" type="string" value="true" />
+            
+            <!-- start putting nodes in long term memory once graph optimization takes more than this many ms -->
+            <param name="Rtabmap/TimeThr" type="string" value="700" />
+
+            <!-- make new nodes at this rate (Hz) -->
+            <param name="Rtabmap/DetectionRate" type="string" value="1" />
+            <param name="publish_tf" type="bool" value="true" />
+
+
+            <!-- only use this height range for projecting the 2D grid_map -->
+            <!-- <param name="Grid/MaxObstacleHeight" type="string" value="1" /> -->
+            <!-- <param name="Grid/MaxGroundHeight" type="string" value="0.02" /> -->
+
+            <!-- apply filtering min neighbors filtering to 3D map pointcloud before projecting the 2D grid_map -->
+            <param name="Grid/NoiseFilteringRadius" type="string" value="0.4" />
+            <param name="Grid/NoiseFilteringMinNeighbors" type="string" value="10" />
+
+            <!-- restrict pose of robot to 3 degrees of freedom (x, y, theta), i.e a 2D plane -->
+            <param name="Reg/Force3DoF" value="true"/>
+        </node>
+
+        <!-- Visualization Node for GUI -->
+        <node if="$(arg visualize)" pkg="rtabmap_viz" type="rtabmap_viz" name="rtabmap_viz" output="screen">
+            <param name="frame_id" value="oak-d_frame"/>
+            <param name="subscribe_odom" value="true"/>
+            <param name="subscribe_rgb" value="true"/>
+            <param name="subscribe_depth" value="true"/>
+            <param name="visualize_occupancy_grid" value="true"/>
+            <remap from="odom"            to="$(arg odom_topic)"/>
+
+        </node>
+    </group>
+
+    <!-- image transport republish for color image (compressed) -->
+    <node if="$(arg compressed)" pkg="image_transport" type="republish" name="republish_color" output="screen" 
+        args="compressed in:=/stereo_inertial_publisher/color/image raw out:=/stereo_inertial_publisher/color/image"
+    />
+
+    <!-- image transport republish for depth image (compressed) -->
+    <node if="$(arg compressed)" pkg="image_transport" type="republish" name="republish_depth" output="screen" 
+        args="compressedDepth in:=/stereo_inertial_publisher/stereo/depth raw out:=/stereo_inertial_publisher/stereo/depth"
+    />
+
+    <node if="$(arg tf_compensation)" pkg="tf2_ros" type="static_transform_publisher" name="baselink_to_oak_d" output="screen"
+        args="0.008 0.0 0.710 0.0 0.0 0.0 base_link oak-d_frame" />
+
+    <!-- Static transform: oak-d_frame  ➜  oak_rgb_camera_optical_frame -->
+    <node if="$(arg tf_compensation)" pkg="tf2_ros" type="static_transform_publisher" name="static_tf_oakd_to_rgb" output="screen"
+            args="0.0 0.0 0.0 -1.571 -0.000 -1.571 oak-d_frame oak_rgb_camera_optical_frame" />
+
+    <!-- Static transform: oak-d_frame  ➜  oak_imu_frame -->
+    <node if="$(arg tf_compensation)" pkg="tf2_ros" type="static_transform_publisher" name="static_tf_oakd_to_imu" output="screen"
+            args="0.000 -0.015 -0.014 0.000 1.571 0.000 oak-d_frame oak_imu_frame" />
+
+</launch>

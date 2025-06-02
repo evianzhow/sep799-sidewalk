@@ -174,3 +174,8 @@ cython_debug/
 catkin_ws/build/
 catkin_ws/devel/
 catkin_ws/install/
+
+# Maps
+catkin_ws/maps/*.yaml
+catkin_ws/maps/*.db
+catkin_ws/maps/*.pgm

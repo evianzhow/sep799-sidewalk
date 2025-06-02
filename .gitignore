@@ -176,6 +176,6 @@ catkin_ws/devel/
 catkin_ws/install/
 
 # Maps
-catkin_ws/maps/*.yaml
-catkin_ws/maps/*.db
-catkin_ws/maps/*.pgm
+catkin_ws/src/husky_oakd_stereo_nav/maps/*.yaml
+catkin_ws/src/husky_oakd_stereo_nav/maps/*.db
+catkin_ws/src/husky_oakd_stereo_nav/maps/*.pgm

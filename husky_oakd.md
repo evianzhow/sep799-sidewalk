@@ -41,6 +41,8 @@ rm -rf build/ devel/
 catkin_make
 source devel/setup.bash
 export LD_PRELOAD=/lib/aarch64-linux-gnu/libgomp.so.1:$LD_PRELOAD
+apt-get update --allow-insecure-repositories
+apt install ros-noetic-navigation -y
 roslaunch husky_oakd_stereo_nav demo_husky_oakd_navigation.launch
 ```
 

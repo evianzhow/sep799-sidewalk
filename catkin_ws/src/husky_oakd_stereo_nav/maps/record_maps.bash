@@ -25,7 +25,7 @@ while [ true ] ; do
 read -s -N 1 -t 1 key
 if [[ $key == $'\x0a' ]];
 then
-cp ~/.ros/rtabmap.db $mapName.db
+cp ~/.ros/rtabmap/rtabmap.db $mapName.db
 exit 0;
 fi
 done

@@ -28,7 +28,7 @@ docker run -it --rm \
    -v $XAUTH:$XAUTH \
    -v /tmp/.X11-unix:/tmp/.X11-unix \
    -v /home/sidewalk/Developer/sep799-sidewalk/catkin_ws:/root/catkin_ws \
-   -v ~/.ros/rtabmap.db:/root/.ros/rtabmap.db \
+   -v /home/sidewalk/.ros/rtabmap:/root/.ros \
    -e LD_LIBRARY_PATH=/opt/ros/noetic/lib:/opt/ros/noetic/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu/tegra \
     introlab3it/rtabmap_ros:noetic-latest \
     /bin/bash
@@ -89,7 +89,7 @@ bash record_maps.bash
 
 ### Navigation using existing maps
 
-1. Copy desired `.db` file to `~/.ros/rtabmap.db`
+1. Copy desired `.db` file to `~/.ros/rtabmap/rtabmap.db`
 2. Specify `static_map_path` in correspondent launch file. 
 3. Manually drive the robot around until it has localized in the map
 4. Send desired navigation goals using the 2D Nav Goal button in RViz

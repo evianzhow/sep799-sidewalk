@@ -79,7 +79,7 @@
         </node>
 
         <!-- Visualization Node for GUI -->
-        <node if="$(arg visualize)" pkg="rtabmap_viz" type="rtabmap_viz" name="rtabmap_viz" output="screen">
+        <node if="$(arg visualize)" pkg="rtabmap_viz" type="rtabmap_viz" name="rtabmap_viz" args="-d $(find rtabmap_demos)/launch/config/rgbd_gui.ini" output="screen">
             <param name="frame_id" value="oak-d_frame"/>
             <param name="subscribe_odom" value="true"/>
             <param name="subscribe_rgb" value="true"/>

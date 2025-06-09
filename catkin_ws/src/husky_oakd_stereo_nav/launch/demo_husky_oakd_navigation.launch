@@ -2,11 +2,13 @@
 <launch>
   <!-- Extra Payload -->
   <!-- Set the environment variable -->
-  <env name="HUSKY_URDF_EXTRAS" value="$(find husky_oakd_stereo_nav)/urdf/oak-d.urdf.xacro" />
+  <env name="HUSKY_URDF_EXTRAS" value="$(find husky_oakd_stereo_nav)/urdf/oak-d.urdf.xacro.orig" />
 
   <!-- Arguments -->
   <arg name="oak_d_type" default="simulator"/>
   <arg name="rtabmap_viz" default="true"/>
+
+  <arg name="nav_config_path" value="$(find husky_oakd_stereo_nav)/config/navigation" />
 
   <!--  https://www.clearpathrobotics.com/assets/guides/noetic/husky/InterfacingWithHusky.html -->
   <arg name="odom_topic" default="/odometry/filtered"/>
@@ -45,7 +47,7 @@
       <param name="approx_sync"         type="bool"   value="true"/>
 
       <!-- use actionlib to send goals to move_base -->
-      <param name="use_action_for_goal" type="bool" value="true"/>
+      <!-- <param name="use_action_for_goal" type="bool" value="true"/> -->
       <remap from="move_base"            to="/move_base"/>
 
       <!-- inputs -->
@@ -78,7 +80,16 @@
   </group>
 
   <!-- move_base -->
-  <include file="$(find husky_navigation)/launch/move_base.launch" />
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam if="$(eval arg('oak_d_type') == 'simulator')" file="$(arg nav_config_path)/costmap_common_sim.yaml" command="load" ns="global_costmap" />
+        <rosparam unless="$(eval arg('oak_d_type') == 'simulator')" file="$(arg nav_config_path)/costmap_common_real.yaml" command="load" ns="global_costmap" />
+        <rosparam if="$(eval arg('oak_d_type') == 'simulator')" file="$(arg nav_config_path)/costmap_common_sim.yaml" command="load" ns="local_costmap" />
+        <rosparam unless="$(eval arg('oak_d_type') == 'simulator')" file="$(arg nav_config_path)/costmap_common_real.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(arg nav_config_path)/costmap_local.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/costmap_global.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/trajectory_planner.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/global_planner.yaml" command="load" />
+    </node>
 
   <!-- IMU Filter Node -->
   <node unless="$(eval arg('oak_d_type') == 'simulator')" 

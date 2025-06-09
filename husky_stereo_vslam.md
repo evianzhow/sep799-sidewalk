@@ -28,6 +28,7 @@ docker run -it --rm \
    -v $XAUTH:$XAUTH \
    -v /tmp/.X11-unix:/tmp/.X11-unix \
    -v /home/sidewalk/Developer/sep799-sidewalk/catkin_ws:/root/catkin_ws \
+   -v ~/.ros/rtabmap.db:/root/.ros/rtabmap.db \
    -e LD_LIBRARY_PATH=/opt/ros/noetic/lib:/opt/ros/noetic/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu/tegra \
     introlab3it/rtabmap_ros:noetic-latest \
     /bin/bash
@@ -42,13 +43,13 @@ catkin_make
 source devel/setup.bash
 export LD_PRELOAD=/lib/aarch64-linux-gnu/libgomp.so.1:$LD_PRELOAD
 apt-get update --allow-insecure-repositories
-apt install ros-noetic-navigation --allow-unauthenticated -y
-roslaunch husky_oakd_stereo_nav demo_husky_oakd_navigation.launch
+apt install ros-noetic-navigation --allow-unauthenticated -y # GlobalPlanner is required for move_base to work properly
+roslaunch husky_oakd_stereo_nav rgbd_vslam_no_visual_odom.launch
 ```
 
 If you are using a real device, launch husky_oakd_stereo_nav with following command:
 ```bash
-roslaunch husky_oakd_stereo_nav demo_husky_oakd_navigation.launch oak_d_type:=device
+roslaunch husky_oakd_stereo_nav rgbd_vslam_no_visual_odom.launch oak_d_type:=device
 ```
 
 `imu_filter_madgwick` should be automatically launched as a node.
@@ -59,7 +60,7 @@ export HUSKY_URDF_EXTRAS=$HOME/Developer/sep799-sidewalk/catkin_ws/src/husky_oak
 roslaunch husky_viz view_robot.launch
 ```
 
-Terminal 4:
+If using a real OAK-D device, launch Terminal 4:
 ```bash
 roslaunch depthai_examples stereo_inertial_node.launch \
     lrcheck:=true \
@@ -74,3 +75,21 @@ roslaunch depthai_examples stereo_inertial_node.launch \
     confidence:=245 \
     LRchecktresh:=10
 ```
+
+---
+
+### Map Saving
+
+After finish mapping:
+
+```bash
+cd catkin_ws/src/husky_oakd_stereo_nav/maps
+bash record_maps.bash
+```
+
+### Navigation using existing maps
+
+1. Copy desired `.db` file to `~/.ros/rtabmap.db`
+2. Specify `static_map_path` in correspondent launch file. 
+3. Manually drive the robot around until it has localized in the map
+4. Send desired navigation goals using the 2D Nav Goal button in RViz

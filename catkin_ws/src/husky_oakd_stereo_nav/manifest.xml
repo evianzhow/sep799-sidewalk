@@ -2,7 +2,7 @@
 <package>
   <description brief="husky_oakd_stereo_nav">
 
-     husky_oakd_stereo_nav
+    Clearpath A200 Husky with OAK-D stereo camera for Visual SLAM and navigation.
 
   </description>
   <version>0.0.1</version>
@@ -23,7 +23,8 @@
   <exec_depend>rtabmap_util</exec_depend>
   <exec_depend>rtabmap_demos</exec_depend>
 
-  <exec_depend>husky_navigation</exec_depend>
+  <exec_depend>move_base</exec_depend>
+  <exec_depend>navigation</exec_depend>
   <exec_depend>depthai_descriptions</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
 

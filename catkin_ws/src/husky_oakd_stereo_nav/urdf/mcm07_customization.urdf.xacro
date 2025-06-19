@@ -70,7 +70,7 @@
     <!-- Dimensions: 110x54.5x33 mm  -->
   </joint>
 
-  <xacro:include filename="$(find husky_oakd_stereo_nav)/urdf/oak-d.urdf.xacro" />
+  <xacro:include filename="$(find husky_oakd_stereo_nav)/urdf/oak-d_kinect.urdf.xacro" />
   <xacro:OAK-D parent="oak-d-base-frame">
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:OAK-D>

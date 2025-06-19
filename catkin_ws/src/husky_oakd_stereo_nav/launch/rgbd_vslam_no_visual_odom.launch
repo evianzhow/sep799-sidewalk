@@ -13,9 +13,9 @@
   <!--  https://www.clearpathrobotics.com/assets/guides/noetic/husky/InterfacingWithHusky.html -->
   <arg name="odom_topic" default="/odometry/filtered"/>
 
-  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="rgb_image_raw" default="/oak_depth/rgb/image_raw"/>
-  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="depth_image_raw" default="/oak_depth/depth/image_raw"/>
-  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="rgb_camera_info" default="/oak_depth/rgb/camera_info"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="rgb_image_raw" default="/oak_d/rgb/image_raw"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="depth_image_raw" default="/oak_d/depth/image_raw"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="rgb_camera_info" default="/oak_d/rgb/camera_info"/>
   <arg if="$(eval arg('oak_d_type') == 'simulator')" name="imu_topic" default="/oak_d/imu"/>
 
   <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="rgb_image_raw" default="/stereo_inertial_publisher/color/image"/>

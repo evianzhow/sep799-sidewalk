@@ -11,9 +11,9 @@
     <arg name="visualize" default="true"/>
 
     <!-- Gazebo Simulation Inputs -->
-    <arg name="rgb_image_raw" default="/oak_depth/rgb/image_raw"/>
-    <arg name="depth_image_raw" default="/oak_depth/depth/image_raw"/>
-    <arg name="rgb_camera_info" default="/oak_depth/rgb/camera_info"/>
+    <arg name="rgb_image_raw" default="/oak_d/color/image_raw"/>
+    <arg name="depth_image_raw" default="/oak_d/depth/image_raw"/>
+    <arg name="rgb_camera_info" default="/oak_d/color/camera_info"/>
 
     <!-- visual loop closure detection using pre recorded 3D map -->
     <group ns="rtabmap">

@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Extra Payload -->
+  <!-- Set the environment variable -->
+  <env name="HUSKY_URDF_EXTRAS" value="$(find husky_oakd_stereo_nav)/urdf/oak-d.urdf.xacro.orig" />
+
+  <!-- Arguments -->
+  <arg name="oak_d_type" default="simulator"/>
+  <arg name="rtabmap_viz" default="true"/>
+
+  <arg name="nav_config_path" value="$(find husky_oakd_stereo_nav)/config/navigation" />
+
+  <!--  https://www.clearpathrobotics.com/assets/guides/noetic/husky/InterfacingWithHusky.html -->
+  <arg name="odom_topic" default="/odometry/filtered"/>
+
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="rgb_image_raw" default="/oak_depth/rgb/image_raw"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="depth_image_raw" default="/oak_depth/depth/image_raw"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="rgb_camera_info" default="/oak_depth/rgb/camera_info"/>
+  <arg if="$(eval arg('oak_d_type') == 'simulator')" name="imu_topic" default="/oak_d/imu"/>
+
+  <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="rgb_image_raw" default="/stereo_inertial_publisher/color/image"/>
+  <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="depth_image_raw" default="/stereo_inertial_publisher/stereo/depth"/>
+  <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="rgb_camera_info" default="/stereo_inertial_publisher/color/camera_info"/>
+  <arg unless="$(eval arg('oak_d_type') == 'simulator')" name="imu_topic" default="/stereo_inertial_publisher/imu/data"/>
+
+  <!-- RTAB-Map -->
+  <arg name="with_camera" default="true"/>
+  <arg name="localization" default="false"/>
+  <arg name="database_path" default="~/.ros/rtabmap.db"/>
+  <arg     if="$(arg localization)" name="rtabmap_args" default=""/>
+  <arg unless="$(arg localization)" name="rtabmap_args" default="-d"/>
+
+  <group ns="rtabmap">
+    <node pkg="rtabmap_sync" type="rgbd_sync" name="rgbd_sync" output="screen">
+      <remap from="rgb/image"         to="$(arg rgb_image_raw)"/>
+      <remap from="depth/image"       to="$(arg depth_image_raw)"/>
+      <remap from="rgb/camera_info"   to="$(arg rgb_camera_info)"/>
+    </node>
+
+    <node name="rtabmap" pkg="rtabmap_slam" type="rtabmap" output="screen" args="$(arg rtabmap_args)">
+      <param name="database_path"       type="string" value="$(arg database_path)"/>
+      <param name="frame_id"            type="string" value="base_footprint"/>
+      <param name="subscribe_rgb"   type="bool" value="false"/>
+      <param name="subscribe_depth" type="bool" value="false"/>
+      <param name="subscribe_rgbd" type="bool" value="true"/>
+      <param name="subscribe_scan"      type="bool"   value="false"/>
+      <param name="approx_sync"         type="bool"   value="true"/>
+
+      <!-- use actionlib to send goals to move_base -->
+      <!-- <param name="use_action_for_goal" type="bool" value="true"/> -->
+      <remap from="move_base"            to="/move_base"/>
+
+      <!-- inputs -->
+      <remap from="odom"            to="$(arg odom_topic)"/>
+      <remap from="rgbd_image"      to="rgbd_image"/>
+      <remap from="imu"              to="$(arg imu_topic)"/>
+
+      <!-- output -->
+      <remap from="grid_map" to="/map"/>
+
+      <!-- RTAB-Map's parameters -->
+      <param name="Reg/Strategy"                 type="string" value="1"/>
+      <param name="Reg/Force3DoF"                type="string" value="true"/>
+      <param name="GridGlobal/MinSize"           type="string" value="20"/>
+
+      <!-- localization mode -->
+      <param     if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
+      <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
+    </node>
+
+    <!-- visualization with rtabmap_viz -->
+    <node if="$(arg rtabmap_viz)" pkg="rtabmap_viz" type="rtabmap_viz" name="rtabmap_viz" args="-d $(find rtabmap_demos)/launch/config/rgbd_gui.ini" output="screen">
+      <param name="subscribe_scan"   type="bool"   value="false"/>
+      <param name="subscribe_odom"   type="bool"   value="true"/>
+      <param name="frame_id"         type="string" value="base_footprint"/>
+      <param name="approx_sync"      type="bool"   value="true"/>
+
+      <remap from="odom"            to="$(arg odom_topic)"/>
+    </node>
+  </group>
+
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam if="$(eval arg('oak_d_type') == 'simulator')" file="$(arg nav_config_path)/costmap_common_sim.yaml" command="load" ns="global_costmap" />
+        <rosparam unless="$(eval arg('oak_d_type') == 'simulator')" file="$(arg nav_config_path)/costmap_common_real.yaml" command="load" ns="global_costmap" />
+        <rosparam if="$(eval arg('oak_d_type') == 'simulator')" file="$(arg nav_config_path)/costmap_common_sim.yaml" command="load" ns="local_costmap" />
+        <rosparam unless="$(eval arg('oak_d_type') == 'simulator')" file="$(arg nav_config_path)/costmap_common_real.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(arg nav_config_path)/costmap_local.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/costmap_global.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/trajectory_planner.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/global_planner.yaml" command="load" />
+    </node>
+
+  <!-- IMU Filter Node -->
+  <node unless="$(eval arg('oak_d_type') == 'simulator')" 
+        pkg="imu_filter_madgwick" 
+        type="imu_filter_node" 
+        name="imu_filter_node">
+      <!-- Remappings -->
+      <remap from="imu/data_raw" to="/stereo_inertial_publisher/imu"/>
+      <remap from="imu/data" to="$(arg imu_topic)"/>
+
+      <!-- Parameters -->
+      <param name="use_mag" value="false"/>
+      <param name="publish_tf" value="false"/>
+  </node>
+
+  <!-- Static transform for oak_rgb_camera_optical_frame -->
+  <node unless="$(eval arg('oak_d_type') == 'simulator')" pkg="tf2_ros" type="static_transform_publisher" name="static_tf_oak_rgb" output="screen"
+        args="0.181 0.000 0.732 -0.500 0.500 -0.500 0.500 base_footprint oak_rgb_camera_optical_frame" />
+
+  <!-- Static transform for oak_imu_frame -->
+  <node unless="$(eval arg('oak_d_type') == 'simulator')" pkg="tf2_ros" type="static_transform_publisher" name="static_tf_oak_imu" output="screen"
+        args="0.181 -0.015 0.718 -0.000 0.707 0.000 0.707 base_footprint oak_imu_frame" />
+
+</launch>

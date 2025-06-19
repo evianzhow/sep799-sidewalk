@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="odom_topic" default="/odom"/>
+    <arg name="base_frame" default="base_link" />
+    <arg name="static_map_path" default="$(find husky_oakd_stereo_nav)/maps/office.yaml" />
+    <arg name="nav_config_path" value="$(find husky_oakd_stereo_nav)/config/navigation" />
+
+    <arg name="visualize" default="true"/>
+
+    <!-- Gazebo Simulation Inputs -->
+    <arg name="rgb_image_raw" default="/oak_depth/rgb/image_raw"/>
+    <arg name="depth_image_raw" default="/oak_depth/depth/image_raw"/>
+    <arg name="rgb_camera_info" default="/oak_depth/rgb/camera_info"/>
+
+    <!-- visual loop closure detection using pre recorded 3D map -->
+    <group ns="rtabmap">
+        <node pkg="rtabmap_sync" type="rgbd_sync" name="rgbd_sync" output="screen">
+            <remap from="rgb/image"         to="$(arg rgb_image_raw)"/>
+            <remap from="depth/image"       to="$(arg depth_image_raw)"/>
+            <remap from="rgb/camera_info"   to="$(arg rgb_camera_info)"/>
+        </node>
+
+        <!-- visual odometry -->
+        <node pkg="rtabmap_odom" type="rgbd_odometry" name="rtabmap_odom" output="screen">
+            <remap from="rgbd_image"       to="rgbd_image"/>
+            <remap from="odom"                  to="$(arg odom_topic)"/>
+            <param name="subscribe_rgbd"  type="bool" value="true"/>
+
+            <param name="frame_id" type="string" value="$(arg base_frame)" />
+            <param name="odom_frame_id" type="string" value="odom" />
+
+            <!-- params controlling how strict odometry is about accepting correspondences,
+                trade-off between frequency/robustness and accuracy -->
+            <param name="Vis/InlierDistance" type="string" value="0.1" />
+            <param name="Vis/MinInliers" type="string" value="20" />
+
+            <param name="GFTT/MinDistance" type="string" value="5" />
+            <param name="publish_tf" type="bool" value="true" />
+
+            <!-- restrict pose of robot to 3 degrees of freedom (x, y, theta), i.e a 2D plane -->
+            <param name="Reg/Force3DoF" value="true" />
+        </node>
+        <!-- wait 10 seconds for ZED camera autoexposure before launching -->
+        <node name="rtabmap_slam" pkg="rtabmap_slam" type="rtabmap" output="screen"
+              args="">
+            <param name="frame_id" type="string" value="$(arg base_frame)" />
+
+            <param name="subscribe_rgb"   type="bool" value="false"/>
+            <param name="subscribe_depth" type="bool" value="false"/>
+            <param name="subscribe_rgbd" type="bool" value="true"/>
+
+            <remap from="odom"            to="$(arg odom_topic)"/>
+            <remap from="rgbd_image"       to="rgbd_image"/>
+            <param name="approx_sync"         type="bool"   value="true"/>
+
+            <param name="queue_size" type="int" value="30" />
+
+            <!-- localization mode -->
+            <param name="Mem/IncrementalMemory" type="string" value="false" />
+
+            <!-- start putting nodes in long term memory once graph optimization takes more than this many ms -->
+            <param name="Rtabmap/TimeThr" type="string" value="700" />
+
+            <!-- make new nodes at this rate (Hz) -->
+            <param name="Rtabmap/DetectionRate" type="string" value="1" />
+            <param name="publish_tf" type="bool" value="true" />
+
+            <!-- only use this height range for projecting the 2D grid_map -->
+            <param name="Grid/MaxObstacleHeight" type="string" value="1" />
+            <param name="Grid/MaxGroundHeight" type="string" value="0.02" />
+
+            <!-- apply filtering min neighbors filtering to 3D map pointcloud before projecting the 2D grid_map -->
+            <param name="Grid/NoiseFilteringRadius" type="string" value="0.4" />
+            <param name="Grid/NoiseFilteringMinNeighbors" type="string" value="10" />
+
+            <!-- restrict pose of robot to 3 degrees of freedom (x, y, theta), i.e a 2D plane -->
+            <param name="Reg/Force3DoF" value="true" />
+
+            <!-- controls how strictly loop closures are accepted, 
+                 trade-off between frequency and accuracy of loop closures -->
+            <param name="Vis/MinInliers" value="35" />
+        </node>
+
+        <!-- Visualization Node for GUI -->
+        <node if="$(arg visualize)" pkg="rtabmap_viz" type="rtabmap_viz" name="rtabmap_viz" args="-d $(find rtabmap_demos)/launch/config/rgbd_gui.ini" output="screen">
+            <param name="frame_id" value="oak-d_frame"/>
+            <param name="subscribe_odom" value="true"/>
+            <param name="subscribe_rgb" value="true"/>
+            <param name="subscribe_depth" value="true"/>
+            <param name="visualize_occupancy_grid" value="true"/>
+            <remap from="odom"            to="$(arg odom_topic)"/>
+        </node>
+    </group>
+
+    <!-- map server to serve static map -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg static_map_path)" />
+
+    <!-- navigation stack -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(arg nav_config_path)/costmap_common_real.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(arg nav_config_path)/costmap_common_real.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(arg nav_config_path)/costmap_local.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/costmap_global.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/trajectory_planner.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/global_planner.yaml" command="load" />
+    </node>
+</launch>

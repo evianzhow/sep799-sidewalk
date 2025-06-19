@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+<!-- Custom Sensor Arch -->
+  <link name="sensor_arch">
+    <visual>
+      <geometry>
+        <mesh filename="package://husky_oakd_stereo_nav/meshes/sensor_arch.STL"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://husky_oakd_stereo_nav/meshes/sensor_arch.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="sensor_arch_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="sensor_arch" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <!-- Swiftnav Antenna -->
+  <link name="swiftnav_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://husky_oakd_stereo_nav/meshes/swiftnav_ant.STL"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://husky_oakd_stereo_nav/meshes/swiftnav_ant.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="swiftnav_link_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="swiftnav_link" />
+    <origin xyz="0.00747 -0.42599 0.57056" rpy="0 0 0" />
+  </joint>
+
+  <link name="D05" />
+  <joint name="base_link_to_d05_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="D05"/>
+    <origin xyz="0.00 0.00 0.234" rpy="0 0 0"/>
+  </joint>
+
+<!-- Ouster OS1-32 -->
+  <xacro:include filename="$(find ouster_description)/urdf/OS1-64.urdf.xacro" />
+  
+  <xacro:OS1-64 parent="D05">
+    <origin xyz="0 0 0.39" rpy="0 0 0" />
+  </xacro:OS1-64>
+
+  <!-- Camera links -->
+
+  <!-- Oak-D Camera Integration -->
+  <link name="oak-d-base-frame"/>
+
+  <!-- Joint connecting Oak-D base to stand -->
+  <joint name="oak_d_base_joint" type="fixed">
+    <parent link="sensor_arch" />
+    <child link="oak-d-base-frame" />
+    <origin xyz="0.091 0.0 0.590" rpy="0.0 0.0 0.0" /> <!-- Front edge of stand, centered on 1cm thick plate -->
+    <!-- Dimensions: 110x54.5x33 mm  -->
+  </joint>
+
+  <xacro:include filename="$(find husky_oakd_stereo_nav)/urdf/oak-d.urdf.xacro" />
+  <xacro:OAK-D parent="oak-d-base-frame">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:OAK-D>
+
+</robot>

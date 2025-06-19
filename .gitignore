@@ -174,3 +174,8 @@ cython_debug/
 catkin_ws/build/
 catkin_ws/devel/
 catkin_ws/install/
+
+# Maps
+catkin_ws/src/husky_oakd_stereo_nav/maps/*.yaml
+catkin_ws/src/husky_oakd_stereo_nav/maps/*.db
+catkin_ws/src/husky_oakd_stereo_nav/maps/*.pgm

@@ -28,5 +28,8 @@
   <exec_depend>imu_filter_madgwick</exec_depend>
   <exec_depend>depthai_descriptions</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
+  <!-- Grab here: https://github.com/clearpathrobotics/ouster_description -->
+  <exec_depend>ouster_description</exec_depend>
+  <exec_depend>ouster_gazebo_plugins</exec_depend>
 
 </package>

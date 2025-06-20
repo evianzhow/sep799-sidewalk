@@ -43,7 +43,7 @@ catkin_make
 source devel/setup.bash
 export LD_PRELOAD=/lib/aarch64-linux-gnu/libgomp.so.1:$LD_PRELOAD
 apt-get update --allow-insecure-repositories
-apt install ros-noetic-navigation --allow-unauthenticated -y # GlobalPlanner is required for move_base to work properly
+apt install ros-noetic-navigation ros-noetic-husky-navigation --allow-unauthenticated -y # GlobalPlanner is required for move_base to work properly
 roslaunch husky_oakd_stereo_nav rgbd_vslam_no_visual_odom.launch
 ```
 

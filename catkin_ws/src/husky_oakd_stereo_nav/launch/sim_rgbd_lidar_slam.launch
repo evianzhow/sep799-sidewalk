@@ -100,10 +100,17 @@
 
     <!--- Run Move Base -->
     <include if="$(arg navigation)" file="$(find husky_navigation)/launch/move_base.launch" />
+    <!-- Issues:
+         When setting icp_odometry:=true with navigation, sending a goal to move_base could cause errors like:
+            "Extrapolation Error: Lookup would require extrapolation into the future.  Requested
+             time 1340.520000000 but the latest data is at time 1340.500000000, when looking up
+             transform from frame [odom] to frame [map]"
+         To fix this change "global_frame: odom" to "global_frame: icp_odom" in "husky_navigation/config/costmap_local.yaml"
+    -->
     <!-- <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
         <rosparam file="$(arg nav_config_path)/costmap_common_sim.yaml" command="load" ns="global_costmap" />
         <rosparam file="$(arg nav_config_path)/costmap_common_sim.yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(arg nav_config_path)/costmap_local.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/costmap_local_lidar.yaml" command="load" />
         <rosparam file="$(arg nav_config_path)/costmap_global.yaml" command="load" />
         <rosparam file="$(arg nav_config_path)/trajectory_planner.yaml" command="load" />
         <rosparam file="$(arg nav_config_path)/global_planner.yaml" command="load" />

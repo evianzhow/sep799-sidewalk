@@ -11,6 +11,8 @@ rosdep check --from-paths src --ignore-src -r # Check the list to be installed
 rosdep install --from-paths src --ignore-src -r -y # Install the packages without prompting
 ```
 
+If `ouster_description` and `ouster_gazebo_plugins` failed to install, you can visit Clearpath's [Fork](https://github.com/clearpathrobotics/ouster_description) to manually install the packages.
+
 To note, the standalone Jetson AGX Orin was installed with Ubuntu 20.04 and a source-code compiled OpenCV, but we failed to build rtabmap_ros with that OpenCV version. Therefore, we used dockerized rtabmap_ros image and joined the ROS Noetic environment using the following command:
 
 ```bash

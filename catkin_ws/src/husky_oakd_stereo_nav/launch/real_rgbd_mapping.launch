@@ -90,6 +90,22 @@
         </node>
     </group>
 
+    <!-- depthai convenice launch -->
+    <include file="$(find depthai_examples)/launch/stereo_inertial_node.launch">
+        <arg name="enableRviz" value="false" />
+        <arg name="lrcheck" value="true" />
+        <arg name="extended" value="false" />
+        <arg name="subpixel" value="true" />
+        <arg name="rectify" value="true" />
+        <arg name="depth_aligned" value="true" />
+        <arg name="enableSpatialDetection" value="false" />
+        <arg name="syncNN" value="false" />
+        <arg name="monoResolution" value="800p" />
+        <arg name="rgbResolution" value="1080p" />
+        <arg name="confidence" value="245" />
+        <arg name="LRchecktresh" value="10" />
+    </include>
+
     <!-- image transport republish for color image (compressed) -->
     <node if="$(arg compressed)" pkg="image_transport" type="republish" name="republish_color" output="screen" 
         args="compressed in:=/stereo_inertial_publisher/color/image raw out:=/stereo_inertial_publisher/color/image"

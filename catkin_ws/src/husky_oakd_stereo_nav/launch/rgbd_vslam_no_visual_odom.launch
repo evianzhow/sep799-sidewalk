@@ -106,7 +106,7 @@
   </node>
 
   <!-- depthai convenice launch -->
-    <include file="$(find depthai_examples)/launch/stereo_inertial_node.launch">
+    <include unless="$(eval arg('oak_d_type') == 'simulator')" file="$(find depthai_examples)/launch/stereo_inertial_node.launch">
         <arg name="enableRviz" value="false" />
         <arg name="lrcheck" value="true" />
         <arg name="extended" value="false" />

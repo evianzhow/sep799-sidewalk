@@ -14,7 +14,7 @@ class ObjectToCostmap:
         rospy.init_node('object_to_costmap', anonymous=True)
         
         # Parameters
-        self.frame_id = rospy.get_param('~frame_id', 'base_link')  # Coordinate frame (LiDAR frame)
+        self.frame_id = rospy.get_param('~frame_id', 'base_footprint')  # Coordinate frame (LiDAR frame)
         self.obstacle_topic = rospy.get_param('~obstacle_topic', '/obstacle_cloud')  # Topic for PointCloud
         self.object_topic = rospy.get_param('~object_topic', '/objects_3d')  # Input 3D objects topic
         self.point_density = rospy.get_param('~point_density', 10000.0)  # Points per cubic meter

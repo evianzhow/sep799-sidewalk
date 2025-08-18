@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="plan_only" default="false"/>
+    <arg name="nav_config_path" value="$(find husky_oakd_stereo_nav)/config/navigation" />
+    <arg name="static_map_path" default="$(find husky_oakd_stereo_nav)/maps/playpen.yaml" />
+
+    <!-- map server to serve static map -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg static_map_path)" />
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom" />
+
+    <!-- navigation stack -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <remap if="$(arg plan_only)" from="/cmd_vel" to="/dummy_cmd_vel" />
+        <rosparam file="$(arg nav_config_path)/costmap_common_sim.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(arg nav_config_path)/costmap_common_sim.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(arg nav_config_path)/costmap_local.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/costmap_global.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/trajectory_planner.yaml" command="load" />
+        <rosparam file="$(arg nav_config_path)/global_planner.yaml" command="load" />
+    </node>
+</launch>
